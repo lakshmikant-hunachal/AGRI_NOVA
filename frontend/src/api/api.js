@@ -127,3 +127,14 @@ export const getMandiPrices = async () => {
   if (!response.ok) throw new Error(data.error || 'Failed to fetch Mandi prices');
   return data;
 };
+
+// Admin Dashboard Stats
+export const getAdminStats = async () => {
+  const response = await fetch(`${API_URL}/admin/stats`, {
+    headers: getHeaders()
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || 'Failed to fetch admin stats');
+  return data;
+};
+

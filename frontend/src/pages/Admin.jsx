@@ -1,23 +1,35 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, Activity, Settings, Database } from 'lucide-react';
+import { Users, Activity, Settings, Database, AlertCircle } from 'lucide-react';
 import { useTranslation } from '../context/LanguageContext';
+import { getAdminStats } from '../api/api';
 
 const Admin = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState({ users: 0, scans: 0 });
+  const [error, setError] = useState('');
   const { t } = useTranslation();
   
   useEffect(() => {
-    // Basic auth check
     const user = JSON.parse(localStorage.getItem('user'));
-    if (!user || user.email !== 'admin@smartcrop.com') { // simple fake admin check
-      // navigate('/login'); // Allow for now just to show the UI
+    if (!user || user.email !== 'admin@smartcrop.com') {
+      navigate('/login');
+      return;
     }
     
-    // Fake stats load
-    setStats({ users: 142, scans: 893 });
+    const fetchStats = async () => {
+      try {
+        const data = await getAdminStats();
+        setStats(data);
+      } catch (err) {
+        console.error("Failed to load admin stats:", err);
+        setError(err.message || 'Failed to load stats');
+      }
+    };
+    
+    fetchStats();
   }, [navigate]);
+
 
   return (
     <div className="container" style={{ padding: '2rem 1.5rem' }}>
@@ -25,6 +37,14 @@ const Admin = () => {
         <h1 className="heading-lg" style={{ marginBottom: '0.5rem' }}>{t('admin.title')}</h1>
         <p style={{ color: 'var(--text-muted)' }}>{t('admin.subtitle')}</p>
       </div>
+
+      {error && (
+        <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid var(--danger)', padding: '1rem', borderRadius: 'var(--radius-sm)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fca5a5' }}>
+          <AlertCircle size={18} style={{ color: 'var(--danger)' }} />
+          <span>{error}</span>
+        </div>
+      )}
+
 
       <div className="grid">
         <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
